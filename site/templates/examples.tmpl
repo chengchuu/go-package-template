@@ -1,0 +1,53 @@
+{{define "content"}}<main id="main-content">
+  <section class="section-space border-bottom" aria-labelledby="examples-title">
+    <div class="container">
+      <p class="eyebrow">Compiled, executable documentation</p>
+      <h1 id="examples-title">Go package examples</h1>
+      <p class="lead col-lg-9">These examples come directly from the repository's Go source. Run them locally to exercise the real public package—there is no browser simulation, remote execution service, or separate reimplementation to keep synchronized.</p>
+      <div class="d-flex flex-wrap gap-2 mt-4">
+        <a class="btn btn-primary" href="#basic-example">Basic command</a>
+        <a class="btn btn-outline-secondary" href="#example-test">Example test</a>
+        <a class="btn btn-link" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="basic-example" class="section-space" aria-labelledby="basic-title">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h2 id="basic-title">Run the basic command</h2>
+          <p>The generator reads this listing from <code>examples/basic/main.go</code>. It configures title-style formatting and square-bracket affixes using only the exported package API.</p>
+          <div class="code-panel"><pre><code>go run ./examples/basic</code></pre><p class="mb-1 text-body-secondary">Expected output</p><pre class="mb-0"><code>[Go Package]</code></pre></div>
+          <p class="mt-3 mb-0"><a href="{{.Config.RepositoryURL}}/blob/main/examples/basic/main.go">Open the basic example source on GitHub</a></p>
+        </div>
+        <div class="col-lg-8"><div class="code-panel"><pre class="mb-0"><code>{{.BasicExample}}</code></pre></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="example-test" class="section-space bg-body-tertiary border-top border-bottom" aria-labelledby="test-title">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h2 id="test-title">Use an example test</h2>
+          <p>The source-derived <code>ExampleFormatLabel</code> function is compiled and its output comment is checked by <code>go test ./...</code>. Use this pattern for README snippets that must remain executable.</p>
+          <div class="code-panel"><pre class="mb-0"><code>go test ./...</code></pre></div>
+          <p class="mt-3 mb-0"><a href="{{.Config.RepositoryURL}}/blob/main/example_test.go">Open the example test source on GitHub</a></p>
+        </div>
+        <div class="col-lg-8"><div class="code-panel"><pre class="mb-0"><code>{{.ExampleTest}}</code></pre></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space" aria-labelledby="next-title">
+    <div class="container">
+      <h2 id="next-title">Continue from working code</h2>
+      <div class="row g-4">
+        <article class="col-md-4"><h3 class="h5">Change the input</h3><p>Copy the basic command, replace the input string, and choose <code>StylePlain</code>, <code>StyleTitle</code>, or <code>StyleUpper</code>.</p></article>
+        <article class="col-md-4"><h3 class="h5">Handle expected errors</h3><p>Use <code>errors.Is</code> with <code>ErrEmptyValue</code> and <code>ErrInvalidStyle</code> when input or configuration can vary.</p></article>
+        <article class="col-md-4"><h3 class="h5">Check exact signatures</h3><p>The <a href="{{.Config.AssetURL "api/"}}">generated API documentation</a> lists every exported function, type, method, constant, and sentinel error.</p></article>
+      </div>
+    </div>
+  </section>
+</main>{{end}}

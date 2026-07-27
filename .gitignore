@@ -1,0 +1,7 @@
+# Generated GitHub Pages output (built in CI).
+/dist/
+
+# Local binaries, coverage, and editor files.
+/bin/
+/coverage.out
+.DS_Store

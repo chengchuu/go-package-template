@@ -1,0 +1,82 @@
+{{define "content"}}<main id="main-content">
+  <section class="hero-section border-bottom">
+    <div class="container py-5 py-lg-6">
+      <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+          <p class="eyebrow">Reusable Go package starter</p>
+          <h1 class="display-4 fw-bold">{{.Config.DisplayName}}</h1>
+          <p class="lead">{{.Config.Description}}</p>
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <a class="btn btn-primary btn-lg" href="{{.Config.AssetURL "examples/"}}">Read the examples</a>
+            <a class="btn btn-outline-secondary btn-lg" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
+            <a class="btn btn-link btn-lg" href="{{.Config.RepositoryURL}}">View source on GitHub</a>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="code-panel" aria-label="Installation command">
+            <div class="d-flex justify-content-between align-items-center mb-2"><span class="small text-body-secondary">Install</span><button class="btn btn-sm btn-outline-secondary" type="button" data-copy-target="#install-command">Copy</button></div>
+            <pre class="mb-0"><code id="install-command">go get {{.Config.ModulePath}}</code></pre>
+            <p class="copy-status mb-0 mt-2" role="status" aria-live="polite" data-copy-status></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="install" class="section-space" aria-labelledby="install-title">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <h2 id="install-title">Install the package</h2>
+          <p>Use Go {{.Config.GoVersion}} or later. The public package lives at the module root, so consumers import the same path they pass to <code>go get</code>.</p>
+        </div>
+        <div class="col-lg-7"><div class="code-panel"><pre><code>go get {{.Config.ModulePath}}</code></pre><pre class="mb-0"><code>import gopackage "{{.Config.ModulePath}}"</code></pre></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="usage" class="section-space bg-body-tertiary border-top border-bottom" aria-labelledby="usage-title">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-5">
+          <h2 id="usage-title">Format a label</h2>
+          <p>The sample API trims input, validates empty values, and applies composable style and affix options. The example is compiled and tested by <code>go test ./...</code>.</p>
+          <a href="{{.Config.RepositoryURL}}/tree/main/examples/basic">Open the complete basic example</a>
+        </div>
+        <div class="col-lg-7"><div class="code-panel"><pre class="mb-0"><code>label, err := gopackage.FormatLabel(
+    "go package",
+    gopackage.WithStyle(gopackage.StyleTitle),
+    gopackage.WithAffixes("[", "]"),
+)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Println(label) // [Go Package]</code></pre></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space" aria-labelledby="capabilities-title">
+    <div class="container">
+      <div class="mb-4"><h2 id="capabilities-title">Verified package capabilities</h2><p class="text-body-secondary">A compact API that is easy to replace while still demonstrating real package design.</p></div>
+      <div class="row g-4">
+        <article class="col-md-4"><div class="card h-100"><div class="card-body"><h3 class="h5">Composable formatting</h3><p class="mb-0">Choose plain, title, or upper-case output and add optional prefix and suffix text.</p></div></div></article>
+        <article class="col-md-4"><div class="card h-100"><div class="card-body"><h3 class="h5">Predictable errors</h3><p class="mb-0">Use <code>errors.Is</code> with <code>ErrEmptyValue</code> and <code>ErrInvalidStyle</code>.</p></div></div></article>
+        <article class="col-md-4"><div class="card h-100"><div class="card-body"><h3 class="h5">Concurrent use</h3><p class="mb-0">A configured <code>Formatter</code> is immutable after construction and safe to share.</p></div></div></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-space bg-body-tertiary border-top" aria-labelledby="api-preview-title">
+    <div class="container">
+      <h2 id="api-preview-title">API preview</h2>
+      <p>The full reference is generated from exported GoDoc comments, so it stays tied to source.</p>
+      <div class="list-group list-group-horizontal-lg">
+        <a class="list-group-item list-group-item-action" href="{{.Config.AssetURL "api/"}}#api-formatlabel"><strong>FormatLabel</strong><br><span class="text-body-secondary">One-call label formatting.</span></a>
+        <a class="list-group-item list-group-item-action" href="{{.Config.AssetURL "api/"}}#api-formatter"><strong>Formatter</strong><br><span class="text-body-secondary">Reusable immutable formatter.</span></a>
+        <a class="list-group-item list-group-item-action" href="{{.Config.AssetURL "api/"}}#api-labeler"><strong>Labeler</strong><br><span class="text-body-secondary">Small consumer-facing interface.</span></a>
+      </div>
+      <p class="mt-4 mb-0">Requires Go {{.Config.GoVersion}} or later and is available under the {{.Config.License}} License.</p>
+    </div>
+  </section>
+</main>{{end}}

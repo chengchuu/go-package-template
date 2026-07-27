@@ -7,7 +7,7 @@ import (
 
 func TestMetadataIsPageSpecific(t *testing.T) {
 	t.Parallel()
-	cfg := DefaultConfig()
+	cfg := testConfig(t)
 	seen := make(map[string]bool)
 	for _, page := range cfg.Pages {
 		metadata, err := Metadata(cfg, page)
@@ -32,7 +32,7 @@ func TestMetadataIsPageSpecific(t *testing.T) {
 
 func TestCrawlerFiles(t *testing.T) {
 	t.Parallel()
-	cfg := DefaultConfig()
+	cfg := testConfig(t)
 	robots := Robots(cfg)
 	if want := "Sitemap: https://chengchuu.github.io/go-package-template/sitemap.xml"; !strings.Contains(robots, want) {
 		t.Fatalf("robots.txt missing %q", want)

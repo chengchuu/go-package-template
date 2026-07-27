@@ -54,6 +54,21 @@ func Build(projectRoot string, cfg SiteConfig) (BuildResult, error) {
 	}
 	outputDir := filepath.Join(projectRoot, cfg.OutputDir)
 	sourceDir := filepath.Join(projectRoot, cfg.SiteSourceDir)
+	api, err := ExtractAPI(projectRoot, cfg.ModulePath)
+	if err != nil {
+		return BuildResult{}, err
+	}
+	if api.PackageName != cfg.PackageName {
+		return BuildResult{}, fmt.Errorf("configured package name %q does not match public Go package %q", cfg.PackageName, api.PackageName)
+	}
+	basicExample, err := os.ReadFile(filepath.Join(projectRoot, "examples", "basic", "main.go"))
+	if err != nil {
+		return BuildResult{}, fmt.Errorf("read basic example: %w", err)
+	}
+	exampleTest, err := os.ReadFile(filepath.Join(projectRoot, "example_test.go"))
+	if err != nil {
+		return BuildResult{}, fmt.Errorf("read example test: %w", err)
+	}
 	if err := os.RemoveAll(outputDir); err != nil {
 		return BuildResult{}, fmt.Errorf("replace generated output: %w", err)
 	}
@@ -71,18 +86,6 @@ func Build(projectRoot string, cfg SiteConfig) (BuildResult, error) {
 		return BuildResult{}, err
 	}
 
-	api, err := ExtractAPI(projectRoot, cfg.ModulePath)
-	if err != nil {
-		return BuildResult{}, err
-	}
-	basicExample, err := os.ReadFile(filepath.Join(projectRoot, "examples", "basic", "main.go"))
-	if err != nil {
-		return BuildResult{}, fmt.Errorf("read basic example: %w", err)
-	}
-	exampleTest, err := os.ReadFile(filepath.Join(projectRoot, "example_test.go"))
-	if err != nil {
-		return BuildResult{}, fmt.Errorf("read example test: %w", err)
-	}
 	for _, page := range cfg.Pages {
 		if err := renderPage(sourceDir, outputDir, cfg, page, api, string(basicExample), string(exampleTest)); err != nil {
 			return BuildResult{}, err

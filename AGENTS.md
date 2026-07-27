@@ -5,9 +5,9 @@ Guidance for automated coding agents working in `go-package-template`.
 ## Scope and package contract
 
 This repository is a reusable Go package template with a generated public website. The module path
-is owned by `go.mod`; its mirrored build-time identity lives in `internal/site/config.go` and is
-guarded by tests. The public package is the module-root `gopackage` package in `doc.go` and
-`package.go`. Keep that root import path intentional and stable.
+is owned by `go.mod`; its mirrored website identity lives in `site.config.json` and is guarded by
+tests. The public package is the module-root `gopackage` package in `doc.go` and `package.go`. Keep
+that root import path intentional and stable.
 
 The package runtime uses only the Go standard library. Website code must not be imported by the
 public Go package. Website changes must not silently alter the public Go package contract. A public
@@ -20,8 +20,10 @@ usage, homepage usage, the generated examples page, and regenerated API document
 - `package_test.go`, `example_test.go`: external-package behavior and executable documentation tests.
 - `examples/basic`: runnable consumer-style example.
 - `cmd/sitegen`: Go CLI for Pages build, validation, and production-like preview.
-- `internal/site/config.go`: single editable website/project identity source; it is build tooling,
-  never public API.
+- `site.config.json`: single editable website/project identity, content metadata, icon, and theme
+  source.
+- `internal/site/config.go`: strict JSON loading, typed configuration, derived URLs/keys, and
+  validation; it is build tooling, never public API.
 - `internal/site`: API extraction, metadata, SEO/PWA generation, icon generation, final-artifact
   validation, preview server, and deterministic tests.
 - `site/templates`: crawlable homepage, examples, API, shared navigation, and layout sources.
@@ -33,7 +35,7 @@ usage, homepage usage, the generated examples page, and regenerated API document
 - `dist/pages`: canonical generated Pages artifact; ignored by Git and generated in CI.
 - `.github/workflows/ci.yml`: package and final-site quality gates.
 - `.github/workflows/pages.yml`: validated Pages artifact upload and deployment.
-- `CUSTOMIZE.md`: ordered Go-specific post-copy conversion checklist.
+- `guides/CUSTOMIZE.md`: ordered Go-specific post-copy conversion checklist.
 
 ## Stable website contract
 
@@ -82,7 +84,7 @@ generated output, leave source correct and regenerate rather than patching outpu
 Keep package examples, README, tests, and API documentation aligned. Add deterministic tests for
 new derivation, metadata, route, scope, or validation behavior. Keep checks independent of external
 network services. Preserve accessible focus, semantic landmarks, initial content, one `h1` per page,
-and unique metadata. Follow `CUSTOMIZE.md` when changing identity so module, repository, Pages,
+and unique metadata. Follow `guides/CUSTOMIZE.md` when changing identity so module, repository, Pages,
 theme, PWA, icon, workflow, and documentation values move together.
 
 Do not add runtime dependencies without a documented consumer benefit. Do not add Node.js merely

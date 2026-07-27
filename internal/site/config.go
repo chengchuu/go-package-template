@@ -1,9 +1,15 @@
 package site
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/url"
+	"os"
 	"path"
+	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -37,26 +43,26 @@ type SiteConfig struct {
 
 // ThemeConfig owns the website color modes and persisted preference identity.
 type ThemeConfig struct {
-	StorageKey string
-	ColorLight string
-	ColorDark  string
-	Primary    ThemePalette
+	StorageKey string       `json:"-"`
+	ColorLight string       `json:"colorLight"`
+	ColorDark  string       `json:"colorDark"`
+	Primary    ThemePalette `json:"primary"`
 }
 
 // ThemePalette contains the coordinated primary colors for both Bootstrap modes.
 type ThemePalette struct {
-	Light PrimaryPalette
-	Dark  PrimaryPalette
+	Light PrimaryPalette `json:"light"`
+	Dark  PrimaryPalette `json:"dark"`
 }
 
 // PrimaryPalette defines interactive and soft-accent colors for one mode.
 type PrimaryPalette struct {
-	Base     string
-	Hover    string
-	Active   string
-	Soft     string
-	RGB      string
-	HoverRGB string
+	Base     string `json:"base"`
+	Hover    string `json:"hover"`
+	Active   string `json:"active"`
+	Soft     string `json:"soft"`
+	RGB      string `json:"rgb"`
+	HoverRGB string `json:"hoverRgb"`
 }
 
 // PageConfig owns the unique identity and production location of one public page.
@@ -69,51 +75,180 @@ type PageConfig struct {
 	SchemaType  string
 }
 
-// DefaultConfig returns the only editable project identity configuration.
-func DefaultConfig() SiteConfig {
-	const (
-		owner = "chengchuu"
-		repo  = "go-package-template"
-	)
-	basePath := DerivePagesBasePath(repo)
-	pagesURL := ProductionURL(owner, repo)
-	return SiteConfig{
-		PackageName:     "gopackage",
-		DisplayName:     "Go Package Template",
-		ModulePath:      "github.com/chengchuu/go-package-template",
-		Description:     "A production-ready starting point for reusable Go packages with documentation, examples, and a public website.",
-		RepositoryOwner: owner,
-		RepositoryName:  repo,
-		RepositoryURL:   "https://github.com/chengchuu/go-package-template",
+// pageConfigFile contains only page values that differ in site.config.json.
+// Description is inherited from the project-level configuration.
+type pageConfigFile struct {
+	Name       string `json:"name"`
+	OutputPath string `json:"outputPath"`
+	Path       string `json:"path"`
+	Title      string `json:"title"`
+	SchemaType string `json:"schemaType"`
+}
+
+type configFile struct {
+	PackageName string           `json:"packageName"`
+	DisplayName string           `json:"displayName"`
+	ModulePath  string           `json:"modulePath"`
+	Description string           `json:"description"`
+	Repository  repositoryConfig `json:"repository"`
+	PWA         pwaConfig        `json:"pwa"`
+	GoVersion   string           `json:"goVersion"`
+	License     string           `json:"license"`
+	Icons       iconConfig       `json:"icons"`
+	Theme       ThemeConfig      `json:"theme"`
+	Pages       []pageConfigFile `json:"pages"`
+}
+
+type repositoryConfig struct {
+	Owner string `json:"owner"`
+	Name  string `json:"name"`
+}
+
+type pwaConfig struct {
+	ShortName string `json:"shortName"`
+}
+
+type iconConfig struct {
+	Favicon         string `json:"favicon"`
+	Icon192         string `json:"icon192"`
+	Icon512         string `json:"icon512"`
+	MaskableIcon512 string `json:"maskableIcon512"`
+	AppleTouchIcon  string `json:"appleTouchIcon"`
+	OpenGraphImage  string `json:"openGraphImage"`
+}
+
+type stablePage struct {
+	OutputPath string
+	Path       string
+	SchemaType string
+}
+
+type moduleDefinition struct {
+	Path      string
+	GoVersion string
+}
+
+var (
+	githubOwnerPattern      = regexp.MustCompile(`^[A-Za-z0-9](?:[A-Za-z0-9-]{0,37}[A-Za-z0-9])?$`)
+	githubRepositoryPattern = regexp.MustCompile(`^[A-Za-z0-9._-]{1,100}$`)
+	stablePages             = map[string]stablePage{
+		"home":     {OutputPath: "index.html", Path: "", SchemaType: "SoftwareSourceCode"},
+		"examples": {OutputPath: "examples/index.html", Path: "examples/", SchemaType: "TechArticle"},
+		"api":      {OutputPath: "api/index.html", Path: "api/", SchemaType: "TechArticle"},
+	}
+)
+
+// LoadConfig reads the editable site.config.json file and derives deployment-specific values.
+func LoadConfig(projectRoot string) (SiteConfig, error) {
+	filename := filepath.Join(projectRoot, "site.config.json")
+	file, err := os.Open(filename)
+	if err != nil {
+		return SiteConfig{}, fmt.Errorf("open site configuration: %w", err)
+	}
+	defer file.Close()
+
+	var source configFile
+	decoder := json.NewDecoder(file)
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&source); err != nil {
+		return SiteConfig{}, fmt.Errorf("decode site configuration: %w", err)
+	}
+	if err := decoder.Decode(&struct{}{}); err != io.EOF {
+		return SiteConfig{}, fmt.Errorf("decode site configuration: expected one JSON object")
+	}
+	module, err := readModuleDefinition(projectRoot)
+	if err != nil {
+		return SiteConfig{}, err
+	}
+	if source.ModulePath != module.Path {
+		return SiteConfig{}, fmt.Errorf("site module path %q does not match go.mod module path %q", source.ModulePath, module.Path)
+	}
+	if source.GoVersion != module.GoVersion && source.GoVersion != strings.TrimSuffix(module.GoVersion, ".0") {
+		return SiteConfig{}, fmt.Errorf("site Go version %q does not match go.mod Go version %q", source.GoVersion, module.GoVersion)
+	}
+
+	repositoryURL := repositoryURL(source.Repository.Owner, source.Repository.Name)
+	basePath := DerivePagesBasePath(source.Repository.Name)
+	theme := source.Theme
+	theme.StorageKey = strings.TrimSpace(source.Repository.Name) + "-theme"
+	pages := make([]PageConfig, 0, len(source.Pages))
+	for _, page := range source.Pages {
+		pages = append(pages, PageConfig{
+			Name:        page.Name,
+			OutputPath:  page.OutputPath,
+			Path:        page.Path,
+			Title:       page.Title,
+			Description: source.Description,
+			SchemaType:  page.SchemaType,
+		})
+	}
+	cfg := SiteConfig{
+		PackageName:     source.PackageName,
+		DisplayName:     source.DisplayName,
+		ModulePath:      source.ModulePath,
+		Description:     source.Description,
+		RepositoryOwner: source.Repository.Owner,
+		RepositoryName:  source.Repository.Name,
+		RepositoryURL:   repositoryURL,
 		PagesBasePath:   basePath,
-		PagesURL:        pagesURL,
-		Theme: ThemeConfig{
-			StorageKey: "go-package-template-theme",
-			ColorLight: "#f7f8fc",
-			ColorDark:  "#0d1220",
-			Primary: ThemePalette{
-				Light: PrimaryPalette{Base: "#5b3fd6", Hover: "#4229b5", Active: "#362097", Soft: "#ece8ff", RGB: "91, 63, 214", HoverRGB: "66, 41, 181"},
-				Dark:  PrimaryPalette{Base: "#a997ff", Hover: "#c3b7ff", Active: "#d9d2ff", Soft: "#29234c", RGB: "169, 151, 255", HoverRGB: "195, 183, 255"},
-			},
-		},
-		CachePrefix:     "go-package-template-pages-",
-		PWAShortName:    "Go Package",
-		GoVersion:       "1.25",
-		License:         "MIT",
+		PagesURL:        ProductionURL(source.Repository.Owner, source.Repository.Name),
+		Theme:           theme,
+		CachePrefix:     strings.TrimSpace(source.Repository.Name) + "-pages-",
+		PWAShortName:    source.PWA.ShortName,
+		GoVersion:       source.GoVersion,
+		License:         source.License,
 		OutputDir:       "dist/pages",
 		SiteSourceDir:   "site",
-		Favicon:         "logo-purple-circle-transparent-32x32.png",
-		Icon192:         "logo-purple-circle-transparent-192x192.png",
-		Icon512:         "logo-purple-circle-transparent-512x512.png",
-		MaskableIcon512: "logo-purple-circle-transparent-maskable-512x512.png",
-		AppleTouchIcon:  "logo-purple-circle-transparent-192x192.png",
-		OpenGraphImage:  "logo-purple-circle-open-graph-1200x630.png",
-		Pages: []PageConfig{
-			{Name: "home", OutputPath: "index.html", Path: "", Title: "Go Package Template | Production-ready Go library starter", Description: "Build a reusable Go package with tested APIs, executable examples, generated documentation, SEO, PWA support, and GitHub Pages.", SchemaType: "SoftwareSourceCode"},
-			{Name: "examples", OutputPath: "examples/index.html", Path: "examples/", Title: "Go examples | Go Package Template", Description: "Read executable, source-derived examples for installing and using the Go Package Template public API.", SchemaType: "TechArticle"},
-			{Name: "api", OutputPath: "api/index.html", Path: "api/", Title: "Go API reference | Go Package Template", Description: "Generated reference documentation for the exported Go Package Template package API, including functions, types, methods, constants, and errors.", SchemaType: "TechArticle"},
-		},
+		Favicon:         source.Icons.Favicon,
+		Icon192:         source.Icons.Icon192,
+		Icon512:         source.Icons.Icon512,
+		MaskableIcon512: source.Icons.MaskableIcon512,
+		AppleTouchIcon:  source.Icons.AppleTouchIcon,
+		OpenGraphImage:  source.Icons.OpenGraphImage,
+		Pages:           pages,
 	}
+	if err := cfg.Validate(); err != nil {
+		return SiteConfig{}, fmt.Errorf("validate site configuration: %w", err)
+	}
+	return cfg, nil
+}
+
+func readModuleDefinition(projectRoot string) (moduleDefinition, error) {
+	filename := filepath.Join(projectRoot, "go.mod")
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return moduleDefinition{}, fmt.Errorf("read module definition: %w", err)
+	}
+	var result moduleDefinition
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) < 2 {
+			continue
+		}
+		switch fields[0] {
+		case "module":
+			result.Path = fields[1]
+			if strings.HasPrefix(result.Path, `"`) || strings.HasPrefix(result.Path, "`") {
+				result.Path, err = strconv.Unquote(result.Path)
+				if err != nil {
+					return moduleDefinition{}, fmt.Errorf("parse module path in %s: %w", filename, err)
+				}
+			}
+		case "go":
+			result.GoVersion = fields[1]
+		}
+	}
+	if result.Path == "" {
+		return moduleDefinition{}, fmt.Errorf("module directive not found in %s", filename)
+	}
+	if result.GoVersion == "" {
+		return moduleDefinition{}, fmt.Errorf("Go version directive not found in %s", filename)
+	}
+	return result, nil
+}
+
+func repositoryURL(owner, repositoryName string) string {
+	return fmt.Sprintf("https://github.com/%s/%s", strings.TrimSpace(owner), strings.TrimSpace(repositoryName))
 }
 
 // DerivePagesBasePath derives a GitHub project Pages path from a repository name.
@@ -158,25 +293,44 @@ func (c SiteConfig) Page(name string) (PageConfig, bool) {
 
 // Validate checks invariants needed by generation and deployment.
 func (c SiteConfig) Validate() error {
-	required := map[string]string{
-		"package name": c.PackageName, "display name": c.DisplayName, "module path": c.ModulePath,
-		"description": c.Description, "repository owner": c.RepositoryOwner, "repository name": c.RepositoryName,
-		"repository URL": c.RepositoryURL, "Pages URL": c.PagesURL, "theme storage key": c.Theme.StorageKey,
-		"cache prefix": c.CachePrefix, "PWA short name": c.PWAShortName, "favicon": c.Favicon,
-		"192px icon": c.Icon192, "512px icon": c.Icon512, "maskable icon": c.MaskableIcon512,
-		"Apple touch icon": c.AppleTouchIcon, "Open Graph image": c.OpenGraphImage,
-		"light background": c.Theme.ColorLight, "dark background": c.Theme.ColorDark,
-		"light primary": c.Theme.Primary.Light.Base, "light primary hover": c.Theme.Primary.Light.Hover,
-		"light primary active": c.Theme.Primary.Light.Active, "light primary soft": c.Theme.Primary.Light.Soft,
-		"light primary RGB": c.Theme.Primary.Light.RGB, "light primary hover RGB": c.Theme.Primary.Light.HoverRGB,
-		"dark primary": c.Theme.Primary.Dark.Base, "dark primary hover": c.Theme.Primary.Dark.Hover,
-		"dark primary active": c.Theme.Primary.Dark.Active, "dark primary soft": c.Theme.Primary.Dark.Soft,
-		"dark primary RGB": c.Theme.Primary.Dark.RGB, "dark primary hover RGB": c.Theme.Primary.Dark.HoverRGB,
+	required := []struct{ label, value string }{
+		{"package name", c.PackageName}, {"display name", c.DisplayName}, {"module path", c.ModulePath},
+		{"description", c.Description}, {"repository owner", c.RepositoryOwner}, {"repository name", c.RepositoryName},
+		{"repository URL", c.RepositoryURL}, {"Pages URL", c.PagesURL}, {"theme storage key", c.Theme.StorageKey},
+		{"cache prefix", c.CachePrefix}, {"PWA short name", c.PWAShortName}, {"Go version", c.GoVersion},
+		{"license", c.License}, {"favicon", c.Favicon}, {"192px icon", c.Icon192}, {"512px icon", c.Icon512},
+		{"maskable icon", c.MaskableIcon512}, {"Apple touch icon", c.AppleTouchIcon}, {"Open Graph image", c.OpenGraphImage},
+		{"light background", c.Theme.ColorLight}, {"dark background", c.Theme.ColorDark},
+		{"light primary", c.Theme.Primary.Light.Base}, {"light primary hover", c.Theme.Primary.Light.Hover},
+		{"light primary active", c.Theme.Primary.Light.Active}, {"light primary soft", c.Theme.Primary.Light.Soft},
+		{"light primary RGB", c.Theme.Primary.Light.RGB}, {"light primary hover RGB", c.Theme.Primary.Light.HoverRGB},
+		{"dark primary", c.Theme.Primary.Dark.Base}, {"dark primary hover", c.Theme.Primary.Dark.Hover},
+		{"dark primary active", c.Theme.Primary.Dark.Active}, {"dark primary soft", c.Theme.Primary.Dark.Soft},
+		{"dark primary RGB", c.Theme.Primary.Dark.RGB}, {"dark primary hover RGB", c.Theme.Primary.Dark.HoverRGB},
 	}
-	for label, value := range required {
-		if strings.TrimSpace(value) == "" {
-			return fmt.Errorf("%s must not be empty", label)
+	for _, item := range required {
+		if strings.TrimSpace(item.value) == "" {
+			return fmt.Errorf("%s must not be empty", item.label)
 		}
+	}
+	images := []struct{ label, filename string }{
+		{"favicon", c.Favicon}, {"192px icon", c.Icon192}, {"512px icon", c.Icon512},
+		{"maskable icon", c.MaskableIcon512}, {"Apple touch icon", c.AppleTouchIcon},
+		{"Open Graph image", c.OpenGraphImage},
+	}
+	for _, image := range images {
+		if strings.ContainsAny(image.filename, `/\`) || !strings.EqualFold(filepath.Ext(image.filename), ".png") {
+			return fmt.Errorf("%s %q must be a PNG filename without a path", image.label, image.filename)
+		}
+	}
+	if !githubOwnerPattern.MatchString(c.RepositoryOwner) {
+		return fmt.Errorf("repository owner %q is not a valid GitHub owner", c.RepositoryOwner)
+	}
+	if !githubRepositoryPattern.MatchString(c.RepositoryName) || c.RepositoryName == "." || c.RepositoryName == ".." {
+		return fmt.Errorf("repository name %q is not a valid GitHub repository name", c.RepositoryName)
+	}
+	if c.RepositoryURL != repositoryURL(c.RepositoryOwner, c.RepositoryName) {
+		return fmt.Errorf("repository URL %q is not derived from repository identity", c.RepositoryURL)
 	}
 	if c.PagesBasePath != DerivePagesBasePath(c.RepositoryName) {
 		return fmt.Errorf("Pages base path %q does not match repository %q", c.PagesBasePath, c.RepositoryName)
@@ -184,18 +338,42 @@ func (c SiteConfig) Validate() error {
 	if c.PagesURL != ProductionURL(c.RepositoryOwner, c.RepositoryName) {
 		return fmt.Errorf("Pages URL %q is not derived from repository identity", c.PagesURL)
 	}
-	if len(c.Pages) != 3 {
+	if c.Theme.StorageKey != c.RepositoryName+"-theme" {
+		return fmt.Errorf("theme storage key %q is not derived from repository identity", c.Theme.StorageKey)
+	}
+	if c.CachePrefix != c.RepositoryName+"-pages-" {
+		return fmt.Errorf("cache prefix %q is not derived from repository identity", c.CachePrefix)
+	}
+	if len(c.Pages) != len(stablePages) {
 		return fmt.Errorf("exactly three stable public pages are required")
 	}
-	seen := make(map[string]bool)
+	seenNames := make(map[string]bool)
+	seenTitles := make(map[string]bool)
 	for _, page := range c.Pages {
-		if page.Name == "" || page.OutputPath == "" || page.Title == "" || page.Description == "" {
+		if page.Name == "" || page.OutputPath == "" || strings.TrimSpace(page.Title) == "" || strings.TrimSpace(page.Description) == "" || page.SchemaType == "" {
 			return fmt.Errorf("page configuration is incomplete: %+v", page)
 		}
-		if seen[page.OutputPath] {
-			return fmt.Errorf("duplicate page output path %q", page.OutputPath)
+		if page.Title != strings.TrimSpace(page.Title) {
+			return fmt.Errorf("page %q title must not have surrounding whitespace", page.Name)
 		}
-		seen[page.OutputPath] = true
+		if seenNames[page.Name] {
+			return fmt.Errorf("duplicate page name %q", page.Name)
+		}
+		seenNames[page.Name] = true
+		expected, ok := stablePages[page.Name]
+		if !ok {
+			return fmt.Errorf("page %q is not one of the stable public pages", page.Name)
+		}
+		if page.OutputPath != expected.OutputPath || page.Path != expected.Path || page.SchemaType != expected.SchemaType {
+			return fmt.Errorf("page %q route or schema does not match the stable public contract", page.Name)
+		}
+		if page.Description != c.Description {
+			return fmt.Errorf("page %q must inherit the project description", page.Name)
+		}
+		if seenTitles[page.Title] {
+			return fmt.Errorf("duplicate page title %q", page.Title)
+		}
+		seenTitles[page.Title] = true
 	}
 	return nil
 }

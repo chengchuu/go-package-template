@@ -121,6 +121,17 @@ func validateHTMLPage(cfg SiteConfig, page PageConfig, markup string) []string {
 			failures = append(failures, fmt.Sprintf("%s: shared navigation is missing %q", label, item))
 		}
 	}
+	for _, control := range []string{
+		`class="theme-picker d-flex flex-nowrap align-items-center gap-2`,
+		"<span>Theme</span>",
+		`<option value="system">System</option>`,
+		`<option value="light">Light</option>`,
+		`<option value="dark">Dark</option>`,
+	} {
+		if !strings.Contains(markup, control) {
+			failures = append(failures, label+": shared theme control is incomplete")
+		}
+	}
 	for _, forbidden := range []string{"localhost", "mazey-npm-template", "MAZEY_NPM_TEMPLATE"} {
 		if strings.Contains(markup, forbidden) {
 			failures = append(failures, fmt.Sprintf("%s: contains forbidden production value %q", label, forbidden))
@@ -128,6 +139,12 @@ func validateHTMLPage(cfg SiteConfig, page PageConfig, markup string) []string {
 	}
 	if !strings.Contains(markup, cfg.Theme.StorageKey) || !strings.Contains(markup, `"system"`) {
 		failures = append(failures, label+": generated theme configuration is incomplete")
+	}
+	if page.Name == "home" || page.Name == "api" {
+		expectedImport := fmt.Sprintf(`import %s "%s"`, cfg.PackageName, cfg.ModulePath)
+		if !strings.Contains(markup, expectedImport) {
+			failures = append(failures, label+": package import example does not match configuration")
+		}
 	}
 	for _, color := range []string{
 		cfg.Theme.Primary.Light.Base, cfg.Theme.Primary.Light.Hover, cfg.Theme.Primary.Light.Active, cfg.Theme.Primary.Light.Soft,

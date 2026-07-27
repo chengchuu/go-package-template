@@ -17,12 +17,12 @@
           <li class="nav-item"><a class="nav-link{{if eq .Page.Name "api"}} active{{end}}" {{if eq .Page.Name "api"}}aria-current="page"{{end}} href="{{.Config.AssetURL "api/"}}">API</a></li>
           <li class="nav-item"><a class="nav-link" href="{{.Config.RepositoryURL}}">GitHub</a></li>
         </ul>
-        <label class="theme-picker ms-lg-3 mt-3 mt-lg-0">
-          <span class="visually-hidden">Theme</span>
-          <select class="form-select form-select-sm" data-theme-select aria-label="Theme">
-            <option value="system">System theme</option>
-            <option value="light">Light theme</option>
-            <option value="dark">Dark theme</option>
+        <label class="theme-picker d-flex flex-nowrap align-items-center gap-2 ms-lg-3 mt-3 mt-lg-0">
+          <span>Theme</span>
+          <select class="form-select form-select-sm w-auto" data-theme-select aria-label="Choose website theme">
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
           </select>
         </label>
       </div>

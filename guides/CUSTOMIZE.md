@@ -5,15 +5,15 @@ Work through this checklist in order. Change source and configuration first, the
 
 ## 1. Replace the Go module path
 
-Change the `module` directive in `go.mod`, then update `SiteConfig.ModulePath`, Go imports, examples,
-and README commands. Use the final source-control import path, including a major-version suffix when
-required by Go modules.
+Change the `module` directive in `go.mod`, then update `modulePath` in `site.config.json`, Go imports,
+examples, and README commands. Use the final source-control import path, including a major-version
+suffix when required by Go modules.
 
 ## 2. Rename the package
 
 Rename the root `package gopackage` declarations and import alias. This template intentionally uses
 an idiomatic root package; move it to `pkg/<name>` only when that extra import-path segment is a
-deliberate consumer contract. Update `SiteConfig.PackageName` either way.
+deliberate consumer contract. Update `packageName` in `site.config.json` either way.
 
 ## 3. Replace the exported sample API
 
@@ -23,8 +23,8 @@ aligned. Avoid exposing website configuration from the package.
 
 ## 4. Set the repository owner and name
 
-Edit `RepositoryOwner` and `RepositoryName` in `internal/site/config.go`, then update
-`RepositoryURL`. The configuration tests intentionally fail if derived identity drifts.
+Edit `repository.owner` and `repository.name` in `site.config.json`. Repository URL, Pages path,
+production URL, theme storage key, and service-worker cache prefix are derived and validated by Go.
 
 ## 5. Confirm the Pages base path and production URL
 
@@ -34,8 +34,9 @@ update the derivation functions, tests, canonical expectations, and workflow tog
 
 ## 6. Replace the package description
 
-Update `SiteConfig.Description`, root GoDoc, README introduction, and page descriptions. Keep claims
-limited to tested capabilities.
+Update the shared top-level `description` in `site.config.json`, root GoDoc, and the README
+introduction. Each generated page reuses this description while retaining its own configured title.
+Keep claims limited to tested capabilities.
 
 ## 7. Rewrite README examples
 
@@ -50,36 +51,38 @@ one descriptive `h1`, and accessible controls.
 
 ## 9. Change the theme storage key
 
-Replace `Theme.StorageKey` with a repository-specific value. Review the coordinated light and dark
-primary palettes together, keep the supported preferences exactly `system`, `light`, and `dark`,
-and keep browser `theme-color` synchronized with the resolved mode.
+The storage key is derived from `repository.name`. Review `theme.colorLight`, `theme.colorDark`, and
+the coordinated light and dark primary palettes in `site.config.json` together. Keep the supported
+preferences exactly `system`, `light`, and `dark`, and keep browser `theme-color` synchronized with
+the resolved mode.
 
 ## 10. Update manifest identity
 
-Review `DisplayName`, `PWAShortName`, description, colors, `start_url`, and `scope`. The last two must
-remain equal to the production Pages base path for project-site deployment.
+Review `displayName`, `pwa.shortName`, description, and colors in `site.config.json`. Generated
+`start_url` and `scope` must remain equal to the derived Pages base path for project-site deployment.
 
 ## 11. Change the service-worker cache prefix
 
-Replace `CachePrefix` with a unique project-specific prefix. Review precached routes after adding or
-removing public pages; cleanup must continue to target only caches with this prefix.
+The cache prefix is derived from `repository.name`. Review precached routes after adding or removing
+public pages; cleanup must continue to target only caches with this project-specific prefix.
 
 ## 12. Replace favicon and PWA icons
 
 Replace the 32px favicon, 192px and 512px application icons, padded 512px maskable icon, and 1200×630
-Open Graph image under `site/assets/icons`. Keep the filenames in `internal/site/config.go`, actual
+Open Graph image under `site/assets/icons`. Keep the filenames in `site.config.json`, actual
 dimensions, manifest declarations, maskable safe zones, Apple-touch link, and social metadata aligned.
 
 ## 13. Review GitHub Actions settings
 
 Update default branches, Go version, Pages environment settings, and action versions in
 `.github/workflows/ci.yml` and `pages.yml`. Keep package checks before artifact upload and retain only
-the permissions required for Pages.
+the permissions required for Pages. Keep `goVersion` in `site.config.json` aligned with the `go`
+directive in `go.mod`; the site generator rejects version drift.
 
 ## 14. Replace license and copyright
 
-Choose the intended license, replace `LICENSE`, and update `SiteConfig.License`, README, footer, and
-copyright owner. Preserve third-party notices for retained Bootstrap files.
+Choose the intended license, replace `LICENSE`, and update `license` in `site.config.json`, README,
+footer, and copyright owner. Preserve third-party notices for retained Bootstrap files.
 
 ## 15. Regenerate API documentation
 

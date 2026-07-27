@@ -76,10 +76,12 @@ generated Pages files by hand.
 
 ## Reusing the template
 
-Follow [CUSTOMIZE.md](CUSTOMIZE.md) in order. Project identity, routes, SEO, theme, manifest, and
-cache settings are centralized in `internal/site/config.go`.
+Follow [guides/CUSTOMIZE.md](guides/CUSTOMIZE.md) in order. Editable project identity, routes, SEO,
+theme, manifest, and icon settings are centralized in `site.config.json`; Go derives and validates
+deployment values in `internal/site/config.go`.
 
 ## License
 
 The Go package and project-authored website code are available under the [MIT License](LICENSE).
-Vendored browser-asset notices are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Vendored browser-asset notices are in
+[guides/THIRD_PARTY_NOTICES.md](guides/THIRD_PARTY_NOTICES.md).

@@ -11,7 +11,7 @@ import (
 func TestBuildCreatesAndValidatesStableRoutes(t *testing.T) {
 	_, filename, _, _ := runtime.Caller(0)
 	root := filepath.Clean(filepath.Join(filepath.Dir(filename), "..", ".."))
-	cfg := DefaultConfig()
+	cfg := testConfig(t)
 	cfg.OutputDir = "dist/test-pages"
 	t.Cleanup(func() { _ = os.RemoveAll(filepath.Join(root, cfg.OutputDir)) })
 
@@ -37,6 +37,64 @@ func TestBuildCreatesAndValidatesStableRoutes(t *testing.T) {
 	}
 	if _, err := ValidateArtifact(root, cfg); err != nil {
 		t.Fatal(err)
+	}
+	homePath := filepath.Join(root, cfg.OutputDir, "index.html")
+	homeHTML, err := os.ReadFile(homePath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedImport := `import ` + cfg.PackageName + ` "` + cfg.ModulePath + `"`
+	staleImport := strings.Replace(string(homeHTML), expectedImport, `import stale "`+cfg.ModulePath+`"`, 1)
+	if staleImport == string(homeHTML) {
+		t.Fatalf("generated homepage is missing %q", expectedImport)
+	}
+	if err := os.WriteFile(homePath, []byte(staleImport), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ValidateArtifact(root, cfg); err == nil || !strings.Contains(err.Error(), "package import example does not match configuration") {
+		t.Fatalf("ValidateArtifact error = %v, want stale package import failure", err)
+	}
+	if err := os.WriteFile(homePath, homeHTML, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	apiPath := filepath.Join(root, cfg.OutputDir, "api", "index.html")
+	apiHTML, err := os.ReadFile(apiPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	staleImport = strings.Replace(string(apiHTML), expectedImport, `import stale "`+cfg.ModulePath+`"`, 1)
+	if staleImport == string(apiHTML) {
+		t.Fatalf("generated API page is missing %q", expectedImport)
+	}
+	if err := os.WriteFile(apiPath, []byte(staleImport), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := ValidateArtifact(root, cfg); err == nil || !strings.Contains(err.Error(), "package import example does not match configuration") {
+		t.Fatalf("ValidateArtifact error = %v, want stale API package import failure", err)
+	}
+}
+
+func TestBuildRejectsPackageNameMismatchWithoutReplacingOutput(t *testing.T) {
+	_, filename, _, _ := runtime.Caller(0)
+	root := filepath.Clean(filepath.Join(filepath.Dir(filename), "..", ".."))
+	cfg := testConfig(t)
+	cfg.PackageName = "differentpackage"
+	cfg.OutputDir = "dist/test-package-mismatch"
+	outputDir := filepath.Join(root, cfg.OutputDir)
+	t.Cleanup(func() { _ = os.RemoveAll(outputDir) })
+	if err := os.MkdirAll(outputDir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	sentinel := filepath.Join(outputDir, "sentinel.txt")
+	if err := os.WriteFile(sentinel, []byte("keep"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Build(root, cfg); err == nil || !strings.Contains(err.Error(), "does not match public Go package") {
+		t.Fatalf("Build error = %v, want package name mismatch", err)
+	}
+	if _, err := os.Stat(sentinel); err != nil {
+		t.Fatalf("existing output was replaced before configuration validation completed: %v", err)
 	}
 }
 

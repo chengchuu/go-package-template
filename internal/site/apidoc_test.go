@@ -10,7 +10,8 @@ func TestExtractAPIUsesExportedRootPackage(t *testing.T) {
 	t.Parallel()
 	_, filename, _, _ := runtime.Caller(0)
 	root := filepath.Clean(filepath.Join(filepath.Dir(filename), "..", ".."))
-	docs, err := ExtractAPI(root, DefaultConfig().ModulePath)
+	cfg := testConfig(t)
+	docs, err := ExtractAPI(root, cfg.ModulePath)
 	if err != nil {
 		t.Fatal(err)
 	}

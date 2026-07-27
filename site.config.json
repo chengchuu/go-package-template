@@ -1,0 +1,68 @@
+{
+  "packageName": "gopackage",
+  "displayName": "Go Package Template",
+  "modulePath": "github.com/chengchuu/go-package-template",
+  "description": "A production-ready starting point for reusable Go packages with documentation, examples, and a public website.",
+  "repository": {
+    "owner": "chengchuu",
+    "name": "go-package-template"
+  },
+  "pwa": {
+    "shortName": "Go Package"
+  },
+  "goVersion": "1.25",
+  "license": "MIT",
+  "icons": {
+    "favicon": "logo-purple-circle-transparent-32x32.png",
+    "icon192": "logo-purple-circle-transparent-192x192.png",
+    "icon512": "logo-purple-circle-transparent-512x512.png",
+    "maskableIcon512": "logo-purple-circle-transparent-maskable-512x512.png",
+    "appleTouchIcon": "logo-purple-circle-transparent-192x192.png",
+    "openGraphImage": "logo-purple-circle-open-graph-1200x630.png"
+  },
+  "theme": {
+    "colorLight": "#f7f8fc",
+    "colorDark": "#0d1220",
+    "primary": {
+      "light": {
+        "base": "#5b3fd6",
+        "hover": "#4229b5",
+        "active": "#362097",
+        "soft": "#ece8ff",
+        "rgb": "91, 63, 214",
+        "hoverRgb": "66, 41, 181"
+      },
+      "dark": {
+        "base": "#a997ff",
+        "hover": "#c3b7ff",
+        "active": "#d9d2ff",
+        "soft": "#29234c",
+        "rgb": "169, 151, 255",
+        "hoverRgb": "195, 183, 255"
+      }
+    }
+  },
+  "pages": [
+    {
+      "name": "home",
+      "outputPath": "index.html",
+      "path": "",
+      "title": "Go Package Template | Production-ready Go library starter",
+      "schemaType": "SoftwareSourceCode"
+    },
+    {
+      "name": "examples",
+      "outputPath": "examples/index.html",
+      "path": "examples/",
+      "title": "Go examples | Go Package Template",
+      "schemaType": "TechArticle"
+    },
+    {
+      "name": "api",
+      "outputPath": "api/index.html",
+      "path": "api/",
+      "title": "Go API reference | Go Package Template",
+      "schemaType": "TechArticle"
+    }
+  ]
+}

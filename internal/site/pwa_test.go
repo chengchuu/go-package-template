@@ -8,7 +8,7 @@ import (
 
 func TestManifestUsesProjectScope(t *testing.T) {
 	t.Parallel()
-	cfg := DefaultConfig()
+	cfg := testConfig(t)
 	data, err := Manifest(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -27,7 +27,7 @@ func TestManifestUsesProjectScope(t *testing.T) {
 
 func TestServiceWorkerIsProjectScoped(t *testing.T) {
 	t.Parallel()
-	cfg := DefaultConfig()
+	cfg := testConfig(t)
 	worker := ServiceWorker(cfg, "test-version", []string{cfg.PagesBasePath})
 	for _, required := range []string{cfg.CachePrefix, cfg.PagesBasePath, "request.method !== \"GET\"", "url.origin !== self.location.origin", "networkFirst", "cacheFirst", "MAX_RUNTIME_ENTRIES"} {
 		if !strings.Contains(worker, required) {

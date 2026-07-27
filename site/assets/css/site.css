@@ -52,8 +52,15 @@ main {
   border-radius: 0.45rem;
 }
 
-.theme-picker select {
-  width: 9.5rem;
+.theme-picker {
+  color: var(--bs-secondary-color);
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.theme-picker .form-select {
+  background-color: var(--bs-tertiary-bg);
 }
 
 .hero-section {

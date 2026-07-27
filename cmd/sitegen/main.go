@@ -19,7 +19,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	cfg := site.DefaultConfig()
+	cfg, err := site.LoadConfig(root)
+	if err != nil {
+		log.Fatal(err)
+	}
 	command := "build"
 	if len(os.Args) > 1 {
 		command = os.Args[1]

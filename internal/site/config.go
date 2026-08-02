@@ -57,12 +57,13 @@ type ThemePalette struct {
 
 // PrimaryPalette defines interactive and soft-accent colors for one mode.
 type PrimaryPalette struct {
-	Base     string `json:"base"`
-	Hover    string `json:"hover"`
-	Active   string `json:"active"`
-	Soft     string `json:"soft"`
-	RGB      string `json:"rgb"`
-	HoverRGB string `json:"hoverRgb"`
+	Base      string `json:"base"`
+	Hover     string `json:"hover"`
+	Active    string `json:"active"`
+	Soft      string `json:"soft"`
+	RGB       string `json:"rgb"`
+	HoverRGB  string `json:"hoverRgb"`
+	ActiveRGB string `json:"activeRgb"`
 }
 
 // PageConfig owns the unique identity and production location of one public page.
@@ -304,9 +305,11 @@ func (c SiteConfig) Validate() error {
 		{"light primary", c.Theme.Primary.Light.Base}, {"light primary hover", c.Theme.Primary.Light.Hover},
 		{"light primary active", c.Theme.Primary.Light.Active}, {"light primary soft", c.Theme.Primary.Light.Soft},
 		{"light primary RGB", c.Theme.Primary.Light.RGB}, {"light primary hover RGB", c.Theme.Primary.Light.HoverRGB},
+		{"light primary active RGB", c.Theme.Primary.Light.ActiveRGB},
 		{"dark primary", c.Theme.Primary.Dark.Base}, {"dark primary hover", c.Theme.Primary.Dark.Hover},
 		{"dark primary active", c.Theme.Primary.Dark.Active}, {"dark primary soft", c.Theme.Primary.Dark.Soft},
 		{"dark primary RGB", c.Theme.Primary.Dark.RGB}, {"dark primary hover RGB", c.Theme.Primary.Dark.HoverRGB},
+		{"dark primary active RGB", c.Theme.Primary.Dark.ActiveRGB},
 	}
 	for _, item := range required {
 		if strings.TrimSpace(item.value) == "" {

@@ -80,8 +80,8 @@ func TestConfiguredThemePalette(t *testing.T) {
 		ColorLight: "#ffffff",
 		ColorDark:  "#141414",
 		Primary: ThemePalette{
-			Light: PrimaryPalette{Base: "#4d8ffb", Hover: "#256fd8", Active: "#185aaa", Soft: "#eaf2ff", RGB: "77, 143, 251", HoverRGB: "37, 111, 216"},
-			Dark:  PrimaryPalette{Base: "#5089e8", Hover: "#6198ee", Active: "#74a5f3", Soft: "#1b3155", RGB: "80, 137, 232", HoverRGB: "97, 152, 238"},
+			Light: PrimaryPalette{Base: "#4d8ffb", Hover: "#256fd8", Active: "#185aaa", Soft: "#eaf2ff", RGB: "77, 143, 251", HoverRGB: "37, 111, 216", ActiveRGB: "24, 90, 170"},
+			Dark:  PrimaryPalette{Base: "#5089e8", Hover: "#6198ee", Active: "#74a5f3", Soft: "#1b3155", RGB: "80, 137, 232", HoverRGB: "97, 152, 238", ActiveRGB: "116, 165, 243"},
 		},
 	}
 	if cfg.Theme != want {

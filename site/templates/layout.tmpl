@@ -56,6 +56,7 @@
         --project-primary-soft: {{.Config.Theme.Primary.Light.Soft}};
         --project-primary-rgb: {{.Config.Theme.Primary.Light.RGB}};
         --project-primary-hover-rgb: {{.Config.Theme.Primary.Light.HoverRGB}};
+        --project-primary-active-rgb: {{.Config.Theme.Primary.Light.ActiveRGB}};
         --project-primary-contrast: {{.Config.Theme.ColorDark}};
         --project-primary-state-contrast: {{.Config.Theme.ColorLight}};
         --bs-primary: var(--project-primary);
@@ -64,8 +65,8 @@
         --bs-primary-text-emphasis: var(--project-primary-active);
         --bs-link-color: var(--project-primary-hover);
         --bs-link-color-rgb: var(--project-primary-hover-rgb);
-        --bs-link-hover-color: var(--project-primary-hover);
-        --bs-link-hover-color-rgb: var(--project-primary-hover-rgb);
+        --bs-link-hover-color: var(--project-primary-active);
+        --bs-link-hover-color-rgb: var(--project-primary-active-rgb);
         --bs-focus-ring-color: rgba(var(--project-primary-rgb), 0.35);
       }
       [data-bs-theme="dark"] {
@@ -75,6 +76,7 @@
         --project-primary-soft: {{.Config.Theme.Primary.Dark.Soft}};
         --project-primary-rgb: {{.Config.Theme.Primary.Dark.RGB}};
         --project-primary-hover-rgb: {{.Config.Theme.Primary.Dark.HoverRGB}};
+        --project-primary-active-rgb: {{.Config.Theme.Primary.Dark.ActiveRGB}};
         --project-primary-contrast: {{.Config.Theme.ColorDark}};
         --project-primary-state-contrast: {{.Config.Theme.ColorDark}};
         --bs-primary: var(--project-primary);
@@ -83,8 +85,8 @@
         --bs-primary-text-emphasis: var(--project-primary-active);
         --bs-link-color: var(--project-primary-hover);
         --bs-link-color-rgb: var(--project-primary-hover-rgb);
-        --bs-link-hover-color: var(--project-primary-hover);
-        --bs-link-hover-color-rgb: var(--project-primary-hover-rgb);
+        --bs-link-hover-color: var(--project-primary-active);
+        --bs-link-hover-color-rgb: var(--project-primary-active-rgb);
         --bs-focus-ring-color: rgba(var(--project-primary-rgb), 0.4);
       }
     </style>

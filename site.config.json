@@ -30,7 +30,8 @@
         "active": "#185aaa",
         "soft": "#eaf2ff",
         "rgb": "77, 143, 251",
-        "hoverRgb": "37, 111, 216"
+        "hoverRgb": "37, 111, 216",
+        "activeRgb": "24, 90, 170"
       },
       "dark": {
         "base": "#5089e8",
@@ -38,7 +39,8 @@
         "active": "#74a5f3",
         "soft": "#1b3155",
         "rgb": "80, 137, 232",
-        "hoverRgb": "97, 152, 238"
+        "hoverRgb": "97, 152, 238",
+        "activeRgb": "116, 165, 243"
       }
     }
   },

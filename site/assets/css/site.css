@@ -6,11 +6,11 @@
   --bs-btn-color: var(--project-primary-contrast);
   --bs-btn-bg: var(--project-primary);
   --bs-btn-border-color: var(--project-primary);
-  --bs-btn-hover-color: var(--project-primary-contrast);
+  --bs-btn-hover-color: var(--project-primary-state-contrast);
   --bs-btn-hover-bg: var(--project-primary-hover);
   --bs-btn-hover-border-color: var(--project-primary-hover);
   --bs-btn-focus-shadow-rgb: var(--project-primary-rgb);
-  --bs-btn-active-color: var(--project-primary-contrast);
+  --bs-btn-active-color: var(--project-primary-state-contrast);
   --bs-btn-active-bg: var(--project-primary-active);
   --bs-btn-active-border-color: var(--project-primary-active);
   --bs-btn-disabled-color: var(--project-primary-contrast);
@@ -79,7 +79,7 @@ main {
 }
 
 .eyebrow {
-  color: var(--bs-primary);
+  color: var(--bs-link-color);
   font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.09em;
@@ -132,7 +132,8 @@ pre {
   display: flex;
   align-items: center;
   gap: 1rem;
-  width: min(30rem, calc(100% - 2rem));
+  width: fit-content;
+  max-width: calc(100% - 2rem);
   padding: 1rem;
   border: var(--bs-border-width) solid var(--bs-border-color);
   border-radius: var(--bs-border-radius-lg);
@@ -141,6 +142,10 @@ pre {
 
 .update-notice[hidden] {
   display: none;
+}
+
+.update-notice [data-pwa-update-now] {
+  flex-shrink: 0;
 }
 
 :focus-visible {

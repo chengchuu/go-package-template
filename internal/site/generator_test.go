@@ -43,6 +43,16 @@ func TestBuildCreatesAndValidatesStableRoutes(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+	for _, themeContract := range []string{
+		`--project-primary-contrast: #141414;`,
+		`--project-primary-state-contrast: #ffffff;`,
+		`--bs-link-color: var(--project-primary-hover);`,
+		`--bs-link-hover-color: var(--project-primary-active);`,
+	} {
+		if !strings.Contains(string(homeHTML), themeContract) {
+			t.Errorf("generated homepage is missing accessible theme contract %q", themeContract)
+		}
+	}
 	expectedImport := `import ` + cfg.PackageName + ` "` + cfg.ModulePath + `"`
 	staleImport := strings.Replace(string(homeHTML), expectedImport, `import stale "`+cfg.ModulePath+`"`, 1)
 	if staleImport == string(homeHTML) {

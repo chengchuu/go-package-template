@@ -53,6 +53,9 @@ func TestBuildCreatesAndValidatesStableRoutes(t *testing.T) {
 			t.Errorf("generated homepage is missing accessible theme contract %q", themeContract)
 		}
 	}
+	if !strings.Contains(string(homeHTML), `class="d-flex flex-column align-items-start gap-2 mt-4"`) {
+		t.Error("generated homepage does not keep the source link below the primary hero actions")
+	}
 	expectedImport := `import ` + cfg.PackageName + ` "` + cfg.ModulePath + `"`
 	staleImport := strings.Replace(string(homeHTML), expectedImport, `import stale "`+cfg.ModulePath+`"`, 1)
 	if staleImport == string(homeHTML) {

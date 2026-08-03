@@ -6,9 +6,11 @@
           <p class="eyebrow">Reusable Go package starter</p>
           <h1 class="display-4 fw-bold">{{.Config.DisplayName}}</h1>
           <p class="lead">{{.Config.Description}}</p>
-          <div class="d-flex flex-wrap gap-2 mt-4">
-            <a class="btn btn-primary btn-lg" href="{{.Config.AssetURL "examples/"}}">Read the examples</a>
-            <a class="btn btn-outline-secondary btn-lg" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
+          <div class="d-flex flex-column align-items-start gap-2 mt-4">
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-primary btn-lg" href="{{.Config.AssetURL "examples/"}}">Read the examples</a>
+              <a class="btn btn-outline-secondary btn-lg" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
+            </div>
             <a class="btn btn-link btn-lg px-0" href="{{.Config.RepositoryURL}}">View source on GitHub</a>
           </div>
         </div>

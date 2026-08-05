@@ -13,12 +13,12 @@
   "goVersion": "1.25",
   "license": "MIT",
   "icons": {
-    "favicon": "logo-purple-circle-transparent-32x32.png",
-    "icon192": "logo-purple-circle-transparent-192x192.png",
-    "icon512": "logo-purple-circle-transparent-512x512.png",
-    "maskableIcon512": "logo-purple-circle-transparent-maskable-512x512.png",
-    "appleTouchIcon": "logo-purple-circle-transparent-192x192.png",
-    "openGraphImage": "logo-purple-circle-open-graph-1200x630.png"
+    "favicon": "logo-32x32.png",
+    "icon192": "logo-192x192.png",
+    "icon512": "logo-512x512.png",
+    "maskableIcon512": "logo-maskable-512x512.png",
+    "appleTouchIcon": "logo-192x192.png",
+    "openGraphImage": "logo-open-graph-1200x630.png"
   },
   "theme": {
     "colorLight": "#ffffff",

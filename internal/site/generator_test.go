@@ -35,6 +35,9 @@ func TestBuildCreatesAndValidatesStableRoutes(t *testing.T) {
 			t.Errorf("generated examples page is missing %q", sourceDeclaration)
 		}
 	}
+	if !strings.Contains(string(examplesHTML), `class="d-flex flex-column align-items-start gap-2 mt-4"`) {
+		t.Error("generated examples page does not keep the API reference link below the example actions")
+	}
 	if _, err := ValidateArtifact(root, cfg); err != nil {
 		t.Fatal(err)
 	}

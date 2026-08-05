@@ -4,10 +4,12 @@
       <p class="eyebrow">Compiled, executable documentation</p>
       <h1 id="examples-title">Go package examples</h1>
       <p class="lead col-lg-9">These examples come directly from the repository's Go source. Run them locally to exercise the real public package—there is no browser simulation, remote execution service, or separate reimplementation to keep synchronized.</p>
-      <div class="d-flex flex-wrap gap-2 mt-4">
-        <a class="btn btn-primary" href="#basic-example">Basic command</a>
-        <a class="btn btn-outline-secondary" href="#example-test">Example test</a>
-        <a class="btn btn-link" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
+      <div class="d-flex flex-column align-items-start gap-2 mt-4">
+        <div class="d-flex flex-wrap gap-2">
+          <a class="btn btn-primary" href="#basic-example">Basic command</a>
+          <a class="btn btn-outline-secondary" href="#example-test">Example test</a>
+        </div>
+        <a class="btn btn-link px-0" href="{{.Config.AssetURL "api/"}}">Read the API reference</a>
       </div>
     </div>
   </section>
